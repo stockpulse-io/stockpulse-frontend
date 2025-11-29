@@ -1,0 +1,195 @@
+/* --- Global Reset & Dark Theme --- */
+:root {
+  --bg-color: #121212;
+  --card-bg: #1e1e1e;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --accent-color: #2962ff;
+  --green: #00c853;
+  --red: #d50000;
+  --border-color: #333;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* --- Layout Containers --- */
+.app-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* --- Header --- */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.app-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* --- Buttons --- */
+button {
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 0.9rem;
+}
+
+button:hover {
+  background-color: #333;
+}
+
+/* --- Stock List (Market Watch) --- */
+.stock-list h2 {
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}
+
+.list-header {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  padding: 10px 15px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stock-item {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  padding: 15px;
+  background-color: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+  align-items: center;
+}
+
+.stock-item:hover {
+  background-color: #2a2a2a;
+}
+
+.stock-item-link:first-of-type .stock-item {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.stock-item-link:last-of-type .stock-item {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border-bottom: none;
+}
+
+.symbol {
+  font-weight: 600;
+  color: #fff;
+}
+
+.price {
+  font-family: 'Roboto Mono', monospace;
+}
+
+.change {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 500;
+  text-align: right;
+}
+
+/* --- Stock Detail View --- */
+.stock-detail {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.stock-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin: 20px 0;
+}
+
+.stock-header h1 {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.live-price {
+  text-align: right;
+}
+
+.live-price h2 {
+  font-size: 1.8rem;
+  font-family: 'Roboto Mono', monospace;
+  margin: 0;
+}
+
+.chart-container {
+  background-color: var(--card-bg);
+  padding: 20px 20px 20px 0; /* Recharts adds its own padding left usually */
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 20px;
+}
+
+/* --- Stats Grid --- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.stats p {
+  background-color: var(--card-bg);
+  padding: 15px;
+  border-radius: 6px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* --- Utility Classes --- */
+.green { color: var(--green); }
+.red { color: var(--red); }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading State */
+.loading {
+  text-align: center;
+  margin-top: 50px;
+  color: var(--text-secondary);
+}
