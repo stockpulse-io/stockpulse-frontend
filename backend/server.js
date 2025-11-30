@@ -22,21 +22,27 @@ const redisClient = createClient({ url: `redis://${process.env.REDIS_HOST || 'lo
 const tickBuffer = new Map();
 
 (async () => {
+  redisSubscriber.on('error', (err) => console.error('Redis subscriber error', err));
+  redisClient.on('error', (err) => console.error('Redis client error', err));
+
   await redisSubscriber.connect();
   await redisClient.connect();
   console.log('✅ Connected to Redis');
-  
-  // Subscribe to Redis
+
+  // Subscribe to Redis: keep handler minimal and use volatile emit
   redisSubscriber.subscribe('live_ticks', (message) => {
     try {
       const tick = JSON.parse(message);
-      console.log(`Recv ${tick.symbol}: ${tick.price}`);
-      // 1. Push to "Market Watch" buffer
+      // keep latest tick per symbol in buffer for market watch
       tickBuffer.set(tick.symbol, tick);
 
-      // 2. Emit INSTANTLY to the specific stock room (for the Chart)
-      // This is "millisecond by millisecond" - no delay
-      io.to(tick.symbol).emit('tick', tick);
+      // emit per-tick to stock room with volatile (no retransmit/backpressure)
+      io.to(tick.symbol).volatile.emit('tick', {
+        symbol: tick.symbol,
+        price: tick.price,
+        event_time: tick.event_time,
+        percent_price_change: tick.percent_price_change // if producer includes it
+      });
     } catch (e) {
       console.error("Error parsing tick:", e);
     }
@@ -46,12 +52,33 @@ const tickBuffer = new Map();
 // Broadcast Market Watch updates every 1 second (Throttling)
 setInterval(() => {
   if (tickBuffer.size > 0) {
-    const updates = Array.from(tickBuffer.values()).map(t => ({
-      symbol: t.symbol,
-      price: parseFloat(t.price),
-      // We send the event time so frontend knows if minute rolled over
-      event_time: t.event_time 
-    }));
+    const updates = Array.from(tickBuffer.values()).map(t => {
+      // Parse price safely
+      const price = (t.price !== undefined && t.price !== null) ? parseFloat(t.price) : 0;
+
+      // Prefer a percent field if producer already added it.
+      // Some producers attach `percent_price_change` or similarly named field.
+      const percentPriceChange = (() => {
+        if (t.percent_price_change !== undefined && t.percent_price_change !== null) return Number(t.percent_price_change);
+        if (t.percentChange !== undefined && t.percentChange !== null) return Number(t.percentChange);
+        // leave undefined if not present
+        return undefined;
+      })();
+
+      // Optional: include open1m if tick contains it (useful for client to compute if percent absent)
+      const open1m = (t.open1m !== undefined && t.open1m !== null) ? Number(t.open1m) : undefined;
+
+      return {
+        symbol: t.symbol,
+        price,
+        event_time: t.event_time,
+        // include change info if present (client will prefer this)
+        percent_price_change: percentPriceChange,
+        // include open1m if available
+        open1m
+      };
+    });
+
 
     io.to('market_watch').emit('market_update', updates);
     tickBuffer.clear();
