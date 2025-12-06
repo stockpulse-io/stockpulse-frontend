@@ -1,0 +1,9 @@
+# docker-compose.yml
+
+services:
+  frontend:
+    build: .
+    container_name: stockpulse-frontend
+    ports:
+      - "3000:80"     # open app at http://localhost:3000
+    restart: unless-stopped
